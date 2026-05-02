@@ -132,8 +132,8 @@
     </div>
     <div class="nav" id="sidebar-nav">
       <div class="nav-item" onclick="switchView('dashboard')">Dashboard</div>
-      <div class="nav-item" onclick="switchView('board')">Kanban Board</div>
-      <div class="nav-item active" onclick="switchView('graph')">Dependencies</div>
+      <div class="nav-item active" onclick="switchView('board')">Kanban Board</div>
+      <div class="nav-item" onclick="switchView('graph')">Dependencies</div>
       <div class="nav-item" onclick="switchView('aiqa')">AI QA Tester</div>
       <div class="nav-item" onclick="switchView('meetings')">Meetings</div>
       <div class="nav-item" onclick="switchView('chat')">Team Chat</div>
@@ -169,10 +169,38 @@
       <h2>Recent Activity</h2>
       <p style="color: var(--text-secondary); margin-top: 10px; font-size: 14px;">JD moved "Setup Firebase Auth" to To Do — 2 hrs ago</p>
       <p style="color: var(--text-secondary); margin-top: 10px; font-size: 14px;">AK started working on "Develop Kanban UI" — 5 hrs ago</p>
+
+      <h2 style="margin-top: 30px;">My Action Items</h2>
+      <p style="color: var(--text-secondary); margin-top: 5px; margin-bottom: 15px; font-size: 14px;">Generated from your meeting notes</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 15px; display: flex; align-items: flex-start; gap: 10px;">
+          <input type="checkbox" style="accent-color: var(--accent-primary); margin-top: 4px;" onchange="this.nextElementSibling.classList.toggle('done')">
+          <div>
+            <div style="font-size: 14px; font-weight: 500; margin-bottom: 5px;" class="todo-text">Update package.json</div>
+            <div style="display: flex; gap: 15px; font-size: 12px; color: var(--text-tertiary);">
+              <span>🧑‍💻 Me</span>
+              <span>📅 Daily Standup</span>
+              <span>🕒 May 2</span>
+            </div>
+          </div>
+        </div>
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 15px; display: flex; align-items: flex-start; gap: 10px;">
+          <input type="checkbox" checked style="accent-color: var(--accent-primary); margin-top: 4px;" onchange="this.nextElementSibling.classList.toggle('done')">
+          <div>
+            <div style="font-size: 14px; font-weight: 500; margin-bottom: 5px; text-decoration: line-through; color: var(--text-tertiary);" class="todo-text done">Create implementation plan</div>
+            <div style="display: flex; gap: 15px; font-size: 12px; color: var(--text-tertiary);">
+              <span>🧑‍💻 Me</span>
+              <span>📅 Sprint Planning</span>
+              <span>🕒 May 1</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Kanban Board View -->
-    <div id="board" class="board-view">
+    <div id="board" class="board-view active">
       <div class="column">
         <div class="col-header">
           <span>To Do</span>
@@ -243,7 +271,7 @@
     </div>
 
     <!-- Dependency Graph View -->
-    <div id="graph" class="view-section active">
+    <div id="graph" class="view-section">
       <h2 style="margin-bottom: 10px;">Task Blockers & Dependencies</h2>
       <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">Visualize how tasks depend on one another across the project.</p>
       
@@ -543,12 +571,7 @@
       }
     }
     window.onload = () => {
-      if (document.getElementById('graph').classList.contains('active')) {
-        setTimeout(() => {
-          mermaid.init(undefined, document.querySelectorAll('.mermaid'));
-          graphRendered = true;
-        }, 500);
-      }
+      switchView('board');
     };
   </script>
 </body>
