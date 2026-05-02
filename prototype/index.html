@@ -109,7 +109,19 @@
     .task-status-update { margin-top: 15px; padding: 15px; background: hsla(145, 70%, 45%, 0.1); border: 1px solid #22c55e; border-radius: var(--radius-md); color: #22c55e; display: none; align-items: center; gap: 10px;}
     
     /* Dependency Graph View */
-    .graph-container { background: white; border-radius: var(--radius-lg); padding: 20px; height: calc(100% - 60px); display: flex; align-items: center; justify-content: center;}
+    .graph-container { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 30px; height: calc(100% - 60px); overflow: auto;}
+    .dep-graph { display: flex; flex-direction: column; gap: 40px; width: 100%; }
+    .dep-row { display: flex; align-items: center; justify-content: flex-start; gap: 15px; flex-wrap: wrap;}
+    .dep-node { padding: 15px 20px; border-radius: var(--radius-md); font-weight: 600; font-size: 14px; color: white; text-align: center; min-width: 180px;}
+    .dep-node.blocked { background: hsla(0, 80%, 50%, 0.2); border: 1px solid hsl(0, 80%, 60%); color: hsl(0, 80%, 65%);}
+    .dep-node.critical { background: hsla(25, 90%, 50%, 0.2); border: 1px solid hsl(25, 90%, 60%); color: hsl(25, 90%, 65%);}
+    .dep-node.in-progress { background: hsla(210, 90%, 50%, 0.2); border: 1px solid hsl(210, 90%, 60%); color: hsl(210, 90%, 70%);}
+    .dep-node.done { background: hsla(140, 70%, 40%, 0.2); border: 1px solid hsl(140, 70%, 50%); color: hsl(140, 70%, 60%);}
+    .dep-node.todo { background: var(--bg-hover); border: 1px solid var(--border-subtle); color: var(--text-primary); }
+    .dep-arrow { font-size: 24px; color: var(--text-tertiary); font-weight: bold; }
+    .dep-legend { display: flex; gap: 15px; margin-bottom: 30px; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap;}
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-color { width: 14px; height: 14px; border-radius: 4px; }
 
   </style>
 </head>
@@ -232,23 +244,35 @@
 
     <!-- Dependency Graph View -->
     <div id="graph" class="view-section">
-      <h2 style="margin-bottom: 20px;">Task Blockers & Dependencies</h2>
+      <h2 style="margin-bottom: 10px;">Task Blockers & Dependencies</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">Visualize how tasks depend on one another across the project.</p>
+      
       <div class="graph-container">
-        <div class="mermaid">
-          graph TD
-            A[Setup Firebase Auth] --> B[Implement Login Screen]
-            A --> C[Protect Dashboard Route]
-            B --> D[Design Landing Page]
-            E[Develop Kanban UI] --> F[Task Drag & Drop API]
-            
-            style A fill:#ef4444,stroke:#991b1b,color:#fff
-            style B fill:#3b82f6,stroke:#1d4ed8,color:#fff
-            style C fill:#3b82f6,stroke:#1d4ed8,color:#fff
-            style D fill:#eab308,stroke:#a16207,color:#fff
-            style E fill:#22c55e,stroke:#166534,color:#fff
-            style F fill:#6b7280,stroke:#374151,color:#fff
-            
-            classDef default font-family:Inter,font-size:14px,font-weight:600,rx:8,ry:8
+        <div class="dep-legend">
+           <div class="legend-item"><div class="legend-color" style="background: hsla(0, 80%, 50%, 0.2); border: 1px solid hsl(0, 80%, 60%);"></div> Blocked</div>
+           <div class="legend-item"><div class="legend-color" style="background: hsla(25, 90%, 50%, 0.2); border: 1px solid hsl(25, 90%, 60%);"></div> Critical Path</div>
+           <div class="legend-item"><div class="legend-color" style="background: hsla(210, 90%, 50%, 0.2); border: 1px solid hsl(210, 90%, 60%);"></div> In Progress</div>
+           <div class="legend-item"><div class="legend-color" style="background: hsla(140, 70%, 40%, 0.2); border: 1px solid hsl(140, 70%, 50%);"></div> Completed</div>
+           <div class="legend-item"><div class="legend-color" style="background: var(--bg-hover); border: 1px solid var(--border-subtle);"></div> To Do</div>
+        </div>
+
+        <div class="dep-graph">
+          <div class="mermaid">
+            graph TD
+              classDef done fill:#2e7d32,stroke:#4caf50,color:#fff;
+              classDef inProgress fill:#1565c0,stroke:#42a5f5,color:#fff;
+              classDef blocked fill:#c62828,stroke:#ef5350,color:#fff;
+              classDef critical fill:#e65100,stroke:#ff9800,color:#fff;
+              classDef todo fill:#424242,stroke:#616161,color:#fff;
+
+              A[Setup Firebase Auth]:::done --> B[Implement Login Screen]:::inProgress
+              B --> C[Protect Dashboard Route]:::blocked
+              
+              D[Design Landing Page]:::critical --> E[Develop Marketing Assets]:::todo
+              
+              F[Develop Kanban UI]:::inProgress --> G[Task Drag & Drop API]:::blocked
+              G --> H[Analytics Dashboard]:::todo
+          </div>
         </div>
       </div>
     </div>
@@ -340,12 +364,35 @@
 
   <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
   <script>
-    mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+    let graphRendered = false;
+
+    function addTask() {
+      const title = prompt("Enter task title:");
+      if (!title) return;
+      const desc = prompt("Enter task description (optional):");
+      
+      const id = 't' + Date.now();
+      const taskHtml = `
+        <div class="task" draggable="true" ondragstart="drag(event)" id="${id}">
+          <div class="task-title">${title}</div>
+          <div class="task-desc">${desc || ''}</div>
+          <div class="task-meta">
+            <span class="badge medium">New</span>
+            <div class="avatar">Me</div>
+          </div>
+        </div>
+      `;
+      
+      const todoCol = document.querySelector('.column:first-child .col-body');
+      todoCol.insertAdjacentHTML('beforeend', taskHtml);
+      updateCounts();
+    }
 
     // Navigation Logic
     const views = {
       'dashboard': { title: 'Project Dashboard', buttonText: 'Settings', action: null },
-      'board': { title: 'Project Alpha - Board', buttonText: '+ Add Task', action: null },
+      'board': { title: 'Project Alpha - Board', buttonText: '+ Add Task', action: addTask },
       'graph': { title: 'Dependencies', buttonText: 'Refresh Graph', action: null },
       'aiqa': { title: 'AI QA Testing', buttonText: '▶ Run Test: Login Flow', action: runAITest },
       'meetings': { title: 'Meeting Notes', buttonText: '+ New Meeting', action: null },
@@ -367,6 +414,13 @@
       
       // Update button action dynamically
       btn.onclick = views[viewId].action || function(){};
+
+      if (viewId === 'graph' && !graphRendered) {
+        setTimeout(() => {
+          mermaid.init(undefined, document.querySelectorAll('.mermaid'));
+          graphRendered = true;
+        }, 100);
+      }
     }
 
     // Drag and Drop Logic
