@@ -132,8 +132,8 @@
     </div>
     <div class="nav" id="sidebar-nav">
       <div class="nav-item" onclick="switchView('dashboard')">Dashboard</div>
-      <div class="nav-item active" onclick="switchView('board')">Kanban Board</div>
-      <div class="nav-item" onclick="switchView('graph')">Dependencies</div>
+      <div class="nav-item" onclick="switchView('board')">Kanban Board</div>
+      <div class="nav-item active" onclick="switchView('graph')">Dependencies</div>
       <div class="nav-item" onclick="switchView('aiqa')">AI QA Tester</div>
       <div class="nav-item" onclick="switchView('meetings')">Meetings</div>
       <div class="nav-item" onclick="switchView('chat')">Team Chat</div>
@@ -172,7 +172,7 @@
     </div>
 
     <!-- Kanban Board View -->
-    <div id="board" class="board-view active">
+    <div id="board" class="board-view">
       <div class="column">
         <div class="col-header">
           <span>To Do</span>
@@ -243,7 +243,7 @@
     </div>
 
     <!-- Dependency Graph View -->
-    <div id="graph" class="view-section">
+    <div id="graph" class="view-section active">
       <h2 style="margin-bottom: 10px;">Task Blockers & Dependencies</h2>
       <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">Visualize how tasks depend on one another across the project.</p>
       
@@ -400,13 +400,23 @@
     };
 
     function switchView(viewId) {
+      console.log('Switching to view:', viewId);
       document.querySelectorAll('.nav-item').forEach(el => {
         el.classList.remove('active');
-        if (el.getAttribute('onclick').includes(viewId)) el.classList.add('active');
+        const onclick = el.getAttribute('onclick');
+        if (onclick && onclick.includes(viewId)) el.classList.add('active');
       });
 
-      document.querySelectorAll('.view-section, .board-view').forEach(el => el.classList.remove('active'));
-      document.getElementById(viewId).classList.add('active');
+      document.querySelectorAll('.view-section, .board-view').forEach(el => {
+        el.classList.remove('active');
+      });
+      
+      const targetView = document.getElementById(viewId);
+      if (targetView) {
+        targetView.classList.add('active');
+      } else {
+        console.error('View not found:', viewId);
+      }
 
       document.getElementById('header-title').innerText = views[viewId].title;
       const btn = document.getElementById('header-action');
@@ -416,10 +426,11 @@
       btn.onclick = views[viewId].action || function(){};
 
       if (viewId === 'graph' && !graphRendered) {
+        console.log('Initializing Mermaid...');
         setTimeout(() => {
           mermaid.init(undefined, document.querySelectorAll('.mermaid'));
           graphRendered = true;
-        }, 100);
+        }, 200);
       }
     }
 
@@ -531,6 +542,14 @@
          updateCounts();
       }
     }
+    window.onload = () => {
+      if (document.getElementById('graph').classList.contains('active')) {
+        setTimeout(() => {
+          mermaid.init(undefined, document.querySelectorAll('.mermaid'));
+          graphRendered = true;
+        }, 500);
+      }
+    };
   </script>
 </body>
 </html>

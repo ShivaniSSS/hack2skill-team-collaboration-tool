@@ -5,6 +5,7 @@ import LoginPage from './login/page';
 import Sidebar from '@/components/Sidebar';
 import DashboardStats from '@/components/DashboardStats';
 import ActivityFeed from '@/components/ActivityFeed';
+import PersonalisedTodos from '@/components/PersonalisedTodos';
 import { subscribeToProjects } from '@/lib/firestore';
 import { LayoutDashboard, TrendingUp, CheckCircle2, AlertTriangle } from 'lucide-react';
 
@@ -80,11 +81,22 @@ function DashboardView({ user, projects, selectedProject }) {
       {selectedProject ? (
         <>
           <DashboardStats projectId={selectedProject.id} />
-          <div style={{ marginTop: 'var(--space-8)' }}>
-            <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, marginBottom: 'var(--space-4)' }}>
-              Recent Activity
-            </h2>
-            <ActivityFeed projectId={selectedProject.id} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-8)', marginTop: 'var(--space-8)' }}>
+            <div>
+              <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, marginBottom: 'var(--space-4)' }}>
+                Recent Activity
+              </h2>
+              <ActivityFeed projectId={selectedProject.id} />
+            </div>
+            <div>
+              <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, marginBottom: 'var(--space-1)' }}>
+                My Action Items
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', marginBottom: 'var(--space-4)' }}>
+                Generated from your meeting notes
+              </p>
+              <PersonalisedTodos projectId={selectedProject.id} user={user} />
+            </div>
           </div>
         </>
       ) : (
