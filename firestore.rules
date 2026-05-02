@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: check if user is authenticated
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Helper: check if user is a project member
+    function isProjectMember(projectId) {
+      return isAuth() && request.auth.uid in get(/databases/$(database)/documents/projects/$(projectId)).data.members;
+    }
+
+    // Users collection — users can read all, write own
+    match /users/{userId} {
+      allow read: if isAuth();
+      allow write: if isAuth() && request.auth.uid == userId;
+    }
+
+    // Projects — members can read/write, anyone auth'd can create
+    match /projects/{projectId} {
+      allow read: if isAuth() && request.auth.uid in resource.data.members;
+      allow create: if isAuth();
+      allow update, delete: if isAuth() && request.auth.uid in resource.data.members;
+
+      // Tasks subcollection
+      match /tasks/{taskId} {
+        allow read, write: if isProjectMember(projectId);
+      }
+
+      // Messages subcollection
+      match /messages/{messageId} {
+        allow read, write: if isProjectMember(projectId);
+      }
+
+      // Activity subcollection
+      match /activity/{activityId} {
+        allow read, write: if isProjectMember(projectId);
+      }
+    }
+
+    // Meetings — project members can access
+    match /meetings/{meetingId} {
+      allow read: if isAuth();
+      allow create: if isAuth();
+      allow update, delete: if isAuth() && request.auth.uid == resource.data.createdBy;
+
+      match /todos/{todoId} {
+        allow read, write: if isAuth();
+      }
+    }
+  }
+}
