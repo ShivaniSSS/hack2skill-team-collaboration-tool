@@ -1,0 +1,20 @@
+- [x] 1. Configuration & Dependencies
+  - [x] Update `package.json` with Vitest, Testing Library, and Stryker
+  - [x] Create `vitest.config.js` and `setupTests.js`
+  - [x] Create `stryker.conf.json`
+- [x] 2. Phase 1: Utilities & Core Logic
+  - [x] Create Firebase Mocks (`src/lib/__mocks__/firebase.js`)
+  - [x] Write 100% coverage tests for `src/utils/helpers.js`
+  - [x] Write tests for Firebase API wrapper (`src/lib/firestore.js`, `src/lib/auth.js`)
+- [x] 3. Phase 2: Contexts & State
+  - [x] Write tests for `AuthContext`
+  - [x] Write tests for `ToastContext`
+- [x] 4. Phase 3: UI Components
+  - [x] Write tests for `TaskCard` and `TaskModal`
+  - [x] Write tests for `KanbanBoard`
+  - [x] Write tests for `MeetingNotes`
+  - [x] Write tests for `ChatPanel` and `ActivityFeed`
+  - [x] Write tests for `DashboardStats` and `AnalyticsDashboard`
+- [x] 5. Phase 4: Pages
+  - [x] Write tests for `src/app/page.js`
+  - [x] Write tests for `src/app/login/page.js`
