@@ -1,0 +1,13 @@
+runtime: python312
+
+handlers:
+- url: /prototype
+  static_dir: prototype
+
+- url: /(.*)
+  static_files: prototype/index.html
+  upload: prototype/index.html
+
+- url: /
+  static_files: prototype/index.html
+  upload: prototype/index.html
